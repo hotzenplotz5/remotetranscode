@@ -30,8 +30,9 @@ avutil_dep = dependency('libavutil')
 avformat_dep = dependency('libavformat')
 avfilter_dep = dependency('libavfilter')
 avcodec_dep = dependency('libavcodec')
+tinyxml2_dep = dependency('tinyxml2')
 
-dash2ts_dependencies = [curl_dep, avutil_dep, avformat_dep, avfilter_dep, avcodec_dep]
+dash2ts_dependencies = [curl_dep, avutil_dep, avformat_dep, avfilter_dep, avcodec_dep, tinyxml2_dep]
 dash2ts_compile_args = ['-O3']
 
 dash2ts_dep = declare_dependency(
