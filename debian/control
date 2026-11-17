@@ -5,6 +5,7 @@ Maintainer: hotzenplotz5 <hotzenplotz5@gmx.de>
 Build-Depends:
  debhelper-compat (= 13),
  cmake,
+ libboost-dev,
  g++,
  meson,
  ninja-build,
