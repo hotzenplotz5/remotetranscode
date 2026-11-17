@@ -11,4 +11,4 @@ override_dh_auto_configure:
 	test -d subprojects/spdlog-1.15.0
 	test -d subprojects/thrift-0.24.0
 	test -d subprojects/tiny-process-library-4bf0e59e64f18d3080a1ce4e853775de2181e993
-	dh_auto_configure --buildsystem=meson -- -Drelease_dir=false -Dbuildtype=release
+	dh_auto_configure --buildsystem=meson -- -Drelease_dir=false
