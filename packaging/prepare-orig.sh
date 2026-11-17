@@ -19,9 +19,22 @@ git -C "${ROOT}" archive --format=tar HEAD | tar -xf - -C "${SOURCE_DIR}"
 cd "${SOURCE_DIR}"
 rm -rf subprojects/packagecache
 
-# Every wrap file carries an immutable source_hash.  Resolve them before the
-# source package is uploaded so the Launchpad builder itself stays offline.
-meson subprojects download
+download_rc=0
+meson subprojects download || download_rc=$?
+
+required_subprojects=(
+  dash2ts-4ef8bf173f7ea355bcab7f7d42f436541d4f795a
+  mINI-0.9.14
+  spdlog-1.15.0
+  thrift-0.24.0
+  tiny-process-library-4bf0e59e64f18d3080a1ce4e853775de2181e993
+)
+for subproject in "${required_subprojects[@]}"; do
+  test -d "subprojects/${subproject}"
+done
+if (( download_rc != 0 )); then
+  printf 'MESON_SUBPROJECT_DOWNLOAD_EXIT=%s (required sources verified)\n' "${download_rc}"
+fi
 
 TMPDIR_ORIG="$(mktemp -d)"
 trap 'rm -rf "${TMPDIR_ORIG}"' EXIT
