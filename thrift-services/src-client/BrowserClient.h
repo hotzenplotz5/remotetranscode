@@ -30,9 +30,14 @@ public:
     bool InsertHbbtv(const std::string& hbbtv);
     bool InsertChannel(const std::string& channel);
     bool StopVideo(const std::string& reason);
+    bool PlayerStatus(int64_t position, int state);
+    bool StreamEvent(int componentTag, int eventId, const std::string& privateData, const std::string& status);
+    bool SetRenderParameters(int width, int frameRate);
+    bool SetBrowserOptions(bool mse, bool zdfQuirks);
 
 private:
     bool connect();
+    void reset();
     template <typename F> bool processInternal(F &&request);
 
 private:

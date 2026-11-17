@@ -1,0 +1,39 @@
+Source: remotetranscode
+Section: video
+Priority: optional
+Maintainer: hotzenplotz5 <hotzenplotz5@gmx.de>
+Build-Depends:
+ debhelper-compat (= 13),
+ cmake,
+ libboost-dev,
+ g++,
+ meson,
+ ninja-build,
+ pkg-config,
+ libssl-dev,
+ libcurl4-openssl-dev,
+ libtinyxml2-dev,
+ libavutil-dev,
+ libavformat-dev,
+ libavfilter-dev,
+ libavcodec-dev
+Standards-Version: 4.7.0
+Rules-Requires-Root: no
+Homepage: https://github.com/hotzenplotz5/remotetranscode
+Vcs-Git: https://github.com/hotzenplotz5/remotetranscode.git
+Vcs-Browser: https://github.com/hotzenplotz5/remotetranscode
+
+Package: remotetranscode
+Architecture: any
+Depends:
+ ${shlibs:Depends},
+ ${misc:Depends},
+ ffmpeg,
+ vdr-plugin-web,
+ cefbrowser
+Description: remote HbbTV transcoder for VDR
+ remotetranscode works with vdr-plugin-web and cefbrowser to provide HbbTV
+ broadband media playback, DASH conversion and MSE transport for VDR.
+ .
+ This package is built from the rellla fixes integration used by the
+ VDR-Suite HbbTV stack.

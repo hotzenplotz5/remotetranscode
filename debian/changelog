@@ -1,0 +1,9 @@
+remotetranscode (0.1+git20261117.49240d0-1~ppa1) UNRELEASED; urgency=medium
+
+  * Package the rellla/fixes integration head 49240d07 for Ubuntu.
+  * Vendor Meson wrap sources into the prepared orig tarball so Launchpad
+    package builds require no outbound network access.
+  * Install the transcoder, helper tools, default codec configuration and
+    systemd service using standard Debian filesystem locations.
+
+ -- hotzenplotz5 <hotzenplotz5@gmx.de>  Tue, 17 Nov 2026 19:15:00 +0100
