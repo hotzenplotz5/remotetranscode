@@ -296,3 +296,42 @@ bool VdrClient::IsWebActive() {
         return client->IsWebActive();
     });
 }
+
+bool VdrClient::SwitchChannel(const std::string& channelId, int onid, int tsid, int sid) {
+    DEBUGLOG("VdrClient::SwitchChannel");
+
+    return processInternal([&]() -> bool {
+        SwitchChannelType input;
+        input.channelId = channelId;
+        input.onid = onid;
+        input.tsid = tsid;
+        input.sid = sid;
+
+        return client->SwitchChannel(input);
+    });
+}
+
+bool VdrClient::OsdEmpty(bool empty) {
+    DEBUGLOG("VdrClient::OsdEmpty");
+
+    return processInternal([&]() -> bool {
+        OsdEmptyType input;
+        input.empty = empty;
+
+        return client->OsdEmpty(input);
+    });
+}
+
+bool VdrClient::ProcessOsdShm(int render_width, int render_height, const std::string& name, const std::vector<OsdRectType>& rects) {
+    DEBUGLOG("VdrClient::ProcessOsdShm");
+
+    return processInternal([&]() -> bool {
+        ProcessOsdShmType input;
+        input.render_width = render_width;
+        input.render_height = render_height;
+        input.name = name;
+        input.rects = rects;
+
+        return client->ProcessOsdShm(input);
+    });
+}

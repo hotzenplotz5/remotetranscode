@@ -282,3 +282,66 @@ bool TranscoderClient::MseEndOfStream(const std::string &streamId) {
         return client->MseEndOfStream(input);
     });
 }
+
+bool TranscoderClient::DownloadLookup(DownloadLookupResult& result, const DownloadLookupType& input) {
+    DEBUGLOG("TranscoderClient::DownloadLookup: %s", input.channel.c_str());
+
+    return processInternal([&]() -> bool {
+        client->DownloadLookup(result, input);
+        return true;
+    });
+}
+
+bool TranscoderClient::DownloadStart(std::string& error, const DownloadStartType& input) {
+    DEBUGLOG("TranscoderClient::DownloadStart: %s", input.name.c_str());
+
+    return processInternal([&]() -> bool {
+        client->DownloadStart(error, input);
+        return true;
+    });
+}
+
+bool TranscoderClient::DownloadList(std::vector<DownloadInfo>& result) {
+    DEBUGLOG("TranscoderClient::DownloadList");
+
+    return processInternal([&]() -> bool {
+        client->DownloadList(result);
+        return true;
+    });
+}
+
+bool TranscoderClient::DownloadRemove(const std::string& id) {
+    DEBUGLOG("TranscoderClient::DownloadRemove: %s", id.c_str());
+
+    return processInternal([&]() -> bool {
+        DownloadRemoveType input;
+        input.id = id;
+
+        return client->DownloadRemove(input);
+    });
+}
+
+bool TranscoderClient::DownloadRetry(std::string& error, const std::string& id) {
+    DEBUGLOG("TranscoderClient::DownloadRetry: %s", id.c_str());
+
+    return processInternal([&]() -> bool {
+        DownloadRetryType input;
+        input.id = id;
+
+        client->DownloadRetry(error, input);
+        return true;
+    });
+}
+
+bool TranscoderClient::DownloadConvert(std::string& error, const std::string& id, int reserve) {
+    DEBUGLOG("TranscoderClient::DownloadConvert: %s", id.c_str());
+
+    return processInternal([&]() -> bool {
+        DownloadConvertType input;
+        input.id = id;
+        input.reserve = reserve;
+
+        client->DownloadConvert(error, input);
+        return true;
+    });
+}

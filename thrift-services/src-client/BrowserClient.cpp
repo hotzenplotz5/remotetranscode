@@ -277,14 +277,24 @@ bool BrowserClient::SetRenderParameters(int width, int frameRate) {
     });
 }
 
-bool BrowserClient::SetBrowserOptions(bool mse, bool zdfQuirks) {
-    DEBUGLOG("BrowserClient::SetBrowserOptions: mse %d, zdf quirks %d", mse, zdfQuirks);
+bool BrowserClient::SetBrowserOptions(bool mse, bool zdfQuirks, bool sharedMemory) {
+    DEBUGLOG("BrowserClient::SetBrowserOptions: mse %d, zdf quirks %d, shared memory %d", mse, zdfQuirks, sharedMemory);
 
     return processInternal([&]() -> bool {
         BrowserOptionsType input;
         input.mse = mse;
         input.zdfQuirks = zdfQuirks;
+        input.sharedMemory = sharedMemory;
 
         return client->SetBrowserOptions(input);
+    });
+}
+
+bool BrowserClient::PageTitle(std::string& title) {
+    DEBUGLOG("BrowserClient::PageTitle");
+
+    return processInternal([&]() -> bool {
+        client->PageTitle(title);
+        return true;
     });
 }

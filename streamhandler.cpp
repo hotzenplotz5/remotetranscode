@@ -41,7 +41,7 @@ std::vector<std::string> split(std::string s, std::string delimiter) {
 // Network options for an input url. Without them ffmpeg/ffprobe wait forever
 // for a hanging server and abort a stream on the first connection reset.
 // Only for http(s), other protocols don't know the reconnect options.
-static void addNetworkOptions(std::vector<std::string>& callStr, const std::string& url) {
+void addNetworkOptions(std::vector<std::string>& callStr, const std::string& url) {
     if (!startsWith(url, "http://") && !startsWith(url, "https://")) {
         return;
     }
@@ -98,9 +98,10 @@ std::shared_ptr<std::string> StreamHandler::probeVideo(std::string url, std::str
     DEBUG("Create empty video");
     transparentVideoFile = "transparent-video-" + browserIp + "_" + std::to_string(browserPort) + "-" + this->postfix + ".webm";
 
+    std::string transparentPath = movie_path + "/" + transparentVideoFile;
     struct stat sb{};
-    if ((stat(transparentVideoFile.c_str(), &sb) != -1) && (remove(transparentVideoFile.c_str()) != 0)) {
-        ERROR("File {} exists and delete failed. Aborting...\n", transparentVideoFile.c_str());
+    if ((stat(transparentPath.c_str(), &sb) != -1) && (remove(transparentPath.c_str()) != 0)) {
+        ERROR("File {} exists and delete failed. Aborting...", transparentPath);
         return nullptr;
     }
 
@@ -984,6 +985,10 @@ std::shared_ptr<std::string> StreamHandler::mseStart(const std::string& postfix,
         // live stream or unknown duration
     }
 
+    // the segments can't be downloaded, but a lookup in MediathekView needs the duration
+    currentUrl.clear();
+    this->duration = length;
+
     if (!createVideoWithLength(length, transparentVideoFile)) {
         return nullptr;
     }
@@ -1023,4 +1028,32 @@ bool StreamHandler::mseEndOfStream() {
 
     mse->endOfStream();
     return true;
+}
+
+DownloadSource StreamHandler::getDownloadSource() {
+    DownloadSource source;
+
+    if (!mse) {
+        source.url = currentUrl;
+        source.cookies = cookies;
+        source.referer = referer;
+        source.userAgent = userAgent;
+
+        if (!ffmpegCopy) {
+            // HLS: the streams of the playlist have no index, ffmpeg chooses the best
+            for (auto &v: bstreams) {
+                if ((v["codec_type"] == "video" || v["codec_type"] == "audio") && v.contains("index") && v["index"].is_number()) {
+                    source.maps.push_back("0:" + std::to_string((int) v["index"]));
+                }
+            }
+        }
+    }
+
+    try {
+        source.duration = std::stod(duration);
+    } catch (...) {
+        // N/A: live stream
+    }
+
+    return source;
 }

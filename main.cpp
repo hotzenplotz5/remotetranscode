@@ -19,6 +19,7 @@
 #include "logger.h"
 #include "streamhandler.h"
 #include "transcodeconfig.h"
+#include "download.h"
 
 TThreadedServer *thriftServer;
 
@@ -31,6 +32,9 @@ int browserPort;
 int seekPause;
 
 std::map<std::string, StreamHandler*> handler;
+
+// the stream of the last Probe or MseStart: a download takes this one
+std::string currentStreamId;
 
 std::mutex httpMutex;
 
@@ -77,6 +81,8 @@ std::string kodiPath = "/storage/.kodi";
 bool enableKodi = false;
 
 std::string movie_path = "./movie"; // default value
+std::string downloadDir;                // empty: no downloads
+std::string mediathekUrl = "https://mediathekviewweb.de";
 std::string transparentMovie;
 std::string fakeMovie;
 bool bindAll = false;
@@ -107,6 +113,7 @@ void RemoteTranscoderServer::Probe(std::string &_return, const ProbeType &input)
     auto stream = new StreamHandler(input.responseIp, std::stoi(input.responsePort), input.vdrIp, std::stoi(input.vdrPort), transcodeConfig,  movie_path, transparentMovie);
     stream->setKodi(enableKodi, kodiPath);
     handler[streamId] = stream;
+    currentStreamId = streamId;
 
     DEBUG("Probe video...");
     auto videoInfo = stream->probeVideo(input.url, "0", input.cookies, input.referer, input.userAgent, input.postfix);
@@ -241,6 +248,7 @@ void RemoteTranscoderServer::MseStart(std::string &_return, const MseStartType &
     auto stream = new StreamHandler(input.responseIp, std::stoi(input.responsePort), input.vdrIp, std::stoi(input.vdrPort), transcodeConfig, movie_path, transparentMovie);
     stream->setKodi(enableKodi, kodiPath);
     handler[streamId] = stream;
+    currentStreamId = streamId;
 
     auto videoInfo = stream->mseStart(input.postfix, input.duration, input.tracks);
     if (videoInfo == nullptr) {
@@ -270,6 +278,40 @@ bool RemoteTranscoderServer::MseEndOfStream(const MseEndOfStreamType &input) {
     std::lock_guard<std::recursive_mutex> lock(handlerMutex);
     auto stream = findHandler(input.streamId);
     return stream != nullptr && stream->mseEndOfStream();
+}
+
+void RemoteTranscoderServer::DownloadLookup(DownloadLookupResult &_return, const DownloadLookupType &input) {
+    DownloadSource source;
+    {
+        std::lock_guard<std::recursive_mutex> lock(handlerMutex);
+        auto stream = findHandler(currentStreamId);
+        if (stream != nullptr) {
+            source = stream->getDownloadSource();
+        }
+    }
+
+    // the query of MediathekView takes a while, no lock
+    _return = downloads::lookup(input, source);
+}
+
+void RemoteTranscoderServer::DownloadStart(std::string &_return, const DownloadStartType &input) {
+    _return = downloads::start(input);
+}
+
+void RemoteTranscoderServer::DownloadList(std::vector<DownloadInfo> &_return) {
+    _return = downloads::list();
+}
+
+bool RemoteTranscoderServer::DownloadRemove(const DownloadRemoveType &input) {
+    return downloads::remove(input.id);
+}
+
+void RemoteTranscoderServer::DownloadRetry(std::string &_return, const DownloadRetryType &input) {
+    _return = downloads::retry(input.id);
+}
+
+void RemoteTranscoderServer::DownloadConvert(std::string &_return, const DownloadConvertType &input) {
+    _return = downloads::convert(input.id, input.reserve);
 }
 
 RemoteTranscoderIf *RemoteTranscoderCloneFactory::getHandler(const TConnectionInfo &connInfo) {
@@ -341,9 +383,8 @@ void startServer() {
 bool readConfiguration(const char* configFile) {
     // check at first if configFile really exists
     struct stat path_stat;
-    stat(configFile, &path_stat);
-    if (!S_ISREG(path_stat.st_mode)) {
-        ERROR("[vdrweb] Unable to read config file: %s. Reason: %s", configFile, strerror(errno));
+    if (stat(configFile, &path_stat) != 0 || !S_ISREG(path_stat.st_mode)) {
+        ERROR("Unable to read config file: {}. Reason: {}", configFile, strerror(errno));
         return false;
     }
 
@@ -352,7 +393,7 @@ bool readConfiguration(const char* configFile) {
     auto result = file.read(ini);
 
     if (!result) {
-        ERROR("Unable to read config file: %s", configFile);
+        ERROR("Unable to read config file: {}", configFile);
         return false;
     }
 
@@ -384,7 +425,7 @@ bool readCodecFile(const char* codecFile) {
     auto result = file.read(ini);
 
     if (!result) {
-        ERROR("Unable to read codec file: %s", codecFile);
+        ERROR("Unable to read codec file: {}", codecFile);
         return false;
     }
 
@@ -427,6 +468,8 @@ int main(int argc, char* argv[]) {
             { "bindall",     optional_argument, nullptr, 'b' },
             { "kodipath",    optional_argument, nullptr, 'k' },
             { "enablekodi",  optional_argument, nullptr, 'a' },
+            { "downloaddir", required_argument, nullptr, 'd' },
+            { "mediathek",   required_argument, nullptr, 'w' },
             {nullptr }
     };
 
@@ -434,7 +477,7 @@ int main(int argc, char* argv[]) {
     bindAll = false;
 
     seekPause = 500;
-    while ((c = getopt_long(argc, argv, "c:t:m:l:s:bak:", long_options, &option_index)) != -1) {
+    while ((c = getopt_long(argc, argv, "c:t:m:l:s:bak:d:w:", long_options, &option_index)) != -1) {
         switch (c) {
             case 'c':
                 if (!readConfiguration(optarg)) {
@@ -471,6 +514,14 @@ int main(int argc, char* argv[]) {
             case 'k':
                 kodiPath = std::string(optarg);
                 break;
+
+            case 'd':
+                downloadDir = std::string(optarg);
+                break;
+
+            case 'w':
+                mediathekUrl = std::string(optarg);
+                break;
         }
     }
 
@@ -486,6 +537,8 @@ int main(int argc, char* argv[]) {
     if (enableKodi) {
         INFO("Kodi has been enabled (-a). This is an experimental feature!");
     }
+
+    downloads::setup(downloadDir, mediathekUrl);
 
     // read whole transparent file into memory
     transparentMovie = readFile(movie_path + "/transparent-full.webm");
@@ -537,9 +590,18 @@ int main(int argc, char* argv[]) {
 
     stopSeekToThread = true;
     thriftServer->stop();
+    downloads::shutdown();
 
     t1.join();
     seekToThread.join();
+
+    // ffmpeg of a running stream would continue without its reader
+    {
+        std::lock_guard<std::recursive_mutex> lock(handlerMutex);
+        while (!handler.empty()) {
+            removeHandler(handler.begin()->first);
+        }
+    }
 
     return 0;
 }

@@ -80,6 +80,36 @@ class RemoteTranscoderHandler : virtual public RemoteTranscoderIf {
     printf("MseEndOfStream\n");
   }
 
+  void DownloadLookup(DownloadLookupResult& _return, const DownloadLookupType& input) {
+    // Your implementation goes here
+    printf("DownloadLookup\n");
+  }
+
+  void DownloadStart(std::string& _return, const DownloadStartType& input) {
+    // Your implementation goes here
+    printf("DownloadStart\n");
+  }
+
+  void DownloadList(std::vector<DownloadInfo> & _return) {
+    // Your implementation goes here
+    printf("DownloadList\n");
+  }
+
+  bool DownloadRemove(const DownloadRemoveType& input) {
+    // Your implementation goes here
+    printf("DownloadRemove\n");
+  }
+
+  void DownloadRetry(std::string& _return, const DownloadRetryType& input) {
+    // Your implementation goes here
+    printf("DownloadRetry\n");
+  }
+
+  void DownloadConvert(std::string& _return, const DownloadConvertType& input) {
+    // Your implementation goes here
+    printf("DownloadConvert\n");
+  }
+
 };
 
 int main(int argc, char **argv) {

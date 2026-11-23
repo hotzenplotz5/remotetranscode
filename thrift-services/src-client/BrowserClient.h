@@ -33,7 +33,8 @@ public:
     bool PlayerStatus(int64_t position, int state);
     bool StreamEvent(int componentTag, int eventId, const std::string& privateData, const std::string& status);
     bool SetRenderParameters(int width, int frameRate);
-    bool SetBrowserOptions(bool mse, bool zdfQuirks);
+    bool SetBrowserOptions(bool mse, bool zdfQuirks, bool sharedMemory = false);
+    bool PageTitle(std::string& title);
 
 private:
     bool connect();

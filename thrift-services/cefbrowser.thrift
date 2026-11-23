@@ -53,7 +53,8 @@ struct RenderParametersType {
 
 struct BrowserOptionsType {
     1: bool mse = true,        // Media Source Extensions for VDR
-    2: bool zdfQuirks = true   // special handling of the ZDF applications
+    2: bool zdfQuirks = true,  // special handling of the ZDF applications
+    3: bool sharedMemory = false   // the OSD in shared memory, VDR on the same machine
 }
 
 struct StreamEventType {
@@ -76,5 +77,6 @@ service CefBrowser extends common.CommonService {
     bool PlayerStatus(1: PlayerStatusType input) throws (1:common.OperationFailed err),
     bool StreamEvent(1: StreamEventType input) throws (1:common.OperationFailed err),
     bool SetRenderParameters(1: RenderParametersType input) throws (1:common.OperationFailed err),
-    bool SetBrowserOptions(1: BrowserOptionsType input) throws (1:common.OperationFailed err)
+    bool SetBrowserOptions(1: BrowserOptionsType input) throws (1:common.OperationFailed err),
+    string PageTitle() throws (1:common.OperationFailed err)         // the title of the current page
 }
