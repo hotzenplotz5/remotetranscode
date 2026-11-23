@@ -2,7 +2,7 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-UPSTREAM_VERSION="${1:-0.1+git20261117.49240d0}"
+UPSTREAM_VERSION="${1:-0.1+git20261123.2d6ee76}"
 OUTDIR="${2:-${ROOT}/dist}"
 SOURCE_DIR="${OUTDIR}/remotetranscode-${UPSTREAM_VERSION}"
 ORIG_TARBALL="${OUTDIR}/remotetranscode_${UPSTREAM_VERSION}.orig.tar.xz"
@@ -48,4 +48,5 @@ tar --sort=name   --mtime="@${SOURCE_DATE_EPOCH}"   --owner=0 --group=0 --numeri
 
 printf 'PREPARED_SOURCE=%s\n' "${SOURCE_DIR}"
 printf 'ORIG_TARBALL=%s\n' "${ORIG_TARBALL}"
-printf 'UPSTREAM_FIX_HEAD=%s\n' "49240d07a7a4f2c299960192cd1fc6f6865de7bb"
+printf 'FORK_SOURCE_HEAD=%s\n' "$(git -C \"${ROOT}\" rev-parse HEAD)"
+printf 'UPSTREAM_FIX_HEAD=%s\n' "2d6ee76bb01ae8e439ac9e01856a8da77eda20ec"

@@ -1,4 +1,12 @@
-remotetranscode (0.1+git20261117.49240d0-1~ppa1) UNRELEASED; urgency=medium
+remotetranscode (0.1+git20261123.2d6ee76-1~ppa1) UNRELEASED; urgency=medium
+
+  * Sync source to Zabrimus upstream 2d6ee76b with HbbTV fixes.
+  * Keep downstream Debian packaging and the spdlog static build repair.
+  * Preserve offline wrapped-source package builds.
+
+ -- hotzenplotz5 <hotzenplotz5@gmx.de>  Mon, 23 Nov 2026 13:00:00 +0100
+
+remotetranscode (0.1+git20261123.2d6ee76-1~ppa1) UNRELEASED; urgency=medium
 
   * Package the rellla/fixes integration head 49240d07 for Ubuntu.
   * Vendor Meson wrap sources into the prepared orig tarball so Launchpad

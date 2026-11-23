@@ -1,8 +1,8 @@
 remotetranscode Debian source package
 =====================================
 
-The packaging branch is based on rellla/remotetranscode fixes commit
-49240d07a7a4f2c299960192cd1fc6f6865de7bb.
+The packaging branch is based on Zabrimus/remotetranscode upstream commit
+2d6ee76bb01ae8e439ac9e01856a8da77eda20ec.
 
 Launchpad builders must not download Meson wrap dependencies during the package
 build.  Run packaging/prepare-orig.sh before creating the source package.  The
