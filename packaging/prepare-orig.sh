@@ -48,5 +48,5 @@ tar --sort=name   --mtime="@${SOURCE_DATE_EPOCH}"   --owner=0 --group=0 --numeri
 
 printf 'PREPARED_SOURCE=%s\n' "${SOURCE_DIR}"
 printf 'ORIG_TARBALL=%s\n' "${ORIG_TARBALL}"
-printf 'FORK_SOURCE_HEAD=%s\n' "$(git -C \"${ROOT}\" rev-parse HEAD)"
+printf 'FORK_SOURCE_HEAD=%s\n' "$(git -C "${ROOT}" rev-parse HEAD)"
 printf 'UPSTREAM_FIX_HEAD=%s\n' "2d6ee76bb01ae8e439ac9e01856a8da77eda20ec"
