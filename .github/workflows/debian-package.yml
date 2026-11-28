@@ -33,12 +33,12 @@ jobs:
 
       - name: Prepare offline source tree
         run: |
-          ./packaging/prepare-orig.sh 0.1+git20261123.2d6ee76
-          test -d dist/remotetranscode-0.1+git20261123.2d6ee76/subprojects/thrift-0.24.0
-          test -f dist/remotetranscode_0.1+git20261123.2d6ee76.orig.tar.xz
+          ./packaging/prepare-orig.sh 0.1+git20261128.ca94751
+          test -d dist/remotetranscode-0.1+git20261128.ca94751/subprojects/thrift-0.24.0
+          test -f dist/remotetranscode_0.1+git20261128.ca94751.orig.tar.xz
 
       - name: Build binary package without network downloads
-        working-directory: dist/remotetranscode-0.1+git20261123.2d6ee76
+        working-directory: dist/remotetranscode-0.1+git20261128.ca94751
         run: |
           dpkg-buildpackage -us -uc -b
 

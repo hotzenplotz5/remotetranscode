@@ -51,12 +51,12 @@ Log entries will be written to stdout/stderr.
 
 ## Test ffmpeg/ffprobe
 It's a good idea, to check if ffmpeg and ffprobe exists and that all necessary libraries exists.
-> cd build/Release
+> cd build/Release (or /usr/local/share/remotetranscode with release_dir=false)
 >
 > ffprobe movie/transparent-full.webm
 >
-> ffmpeg -i movie/transparent-full.webm -t 10 -codec copy -f webm please_remove_me.mp4
+> ffmpeg -i movie/transparent-full.webm -t 10 -codec copy -f webm /tmp/please_remove_me.mp4
 >
-> rm please_remove_me.mp4
+> rm /tmp/please_remove_me.mp4
 
 Both ffprobe and ffmpeg shall throw no errors.

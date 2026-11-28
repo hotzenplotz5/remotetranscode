@@ -1,3 +1,9 @@
+remotetranscode (0.1+git20261128.ca94751-1~ppa1) UNRELEASED; urgency=medium
+
+  * Integrate upstream ca947518; keep Debian layout and static spdlog.
+
+ -- hotzenplotz5 <hotzenplotz5@gmx.de>  Sat, 28 Nov 2026 10:35:00 +0100
+
 remotetranscode (0.1+git20261123.2d6ee76-1~ppa1) UNRELEASED; urgency=medium
 
   * Sync source to Zabrimus upstream 2d6ee76b with HbbTV fixes.
