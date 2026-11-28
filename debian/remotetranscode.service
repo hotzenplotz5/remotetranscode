@@ -1,0 +1,18 @@
+[Unit]
+Description=HbbTV Remote Transcoder
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=vdr
+Group=vdr
+WorkingDirectory=/var/lib/remotetranscode
+ExecStart=/usr/bin/remotrans -c /etc/vdr/sockets.ini -t /etc/remotetranscode/codecs.ini -m /usr/share/remotetranscode/movie
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=20
+NoNewPrivileges=true
+UMask=0027
+
+[Install]
+WantedBy=multi-user.target

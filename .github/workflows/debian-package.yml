@@ -1,0 +1,81 @@
+name: Debian package
+
+on:
+  push:
+    branches:
+      - packaging/rellla-fixes
+    paths:
+      - 'debian/**'
+      - 'packaging/**'
+      - '.github/workflows/debian-package.yml'
+      - 'meson.build'
+      - 'meson_options.txt'
+      - 'subprojects/**'
+      - '*.cpp'
+      - '*.h'
+      - 'thrift-services/**'
+      - 'static-content/**'
+  workflow_dispatch:
+
+jobs:
+  package-amd64:
+    name: ${{ matrix.series }}-amd64
+    runs-on: ubuntu-24.04
+    container:
+      image: ${{ matrix.image }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - series: noble
+            image: ubuntu:24.04
+          - series: resolute
+            image: ubuntu:26.04
+    env:
+      DEBIAN_FRONTEND: noninteractive
+    timeout-minutes: 45
+    steps:
+      - name: Install build dependencies for ${{ matrix.series }}
+        run: |
+          . /etc/os-release
+          test "$VERSION_CODENAME" = "${{ matrix.series }}"
+          apt-get update
+          apt-get install -y ca-certificates git curl             build-essential devscripts debhelper dpkg-dev lintian             cmake meson ninja-build pkg-config libboost-dev xz-utils             libssl-dev libcurl4-openssl-dev libtinyxml2-dev             libavutil-dev libavformat-dev libavfilter-dev libavcodec-dev
+
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Prepare offline source tree
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          ./packaging/prepare-orig.sh 0.1+git20261128.ca94751
+          test -d dist/remotetranscode-0.1+git20261128.ca94751/subprojects/thrift-0.24.0
+          test -f dist/remotetranscode_0.1+git20261128.ca94751.orig.tar.xz
+
+      - name: Build binary package without network downloads
+        working-directory: dist/remotetranscode-0.1+git20261128.ca94751
+        run: |
+          dpkg-buildpackage -us -uc -b
+
+      - name: Verify package payload
+        run: |
+          deb="$(find dist -maxdepth 1 -name 'remotetranscode_*_amd64.deb' -print -quit)"
+          test -n "$deb"
+          dpkg-deb -f "$deb" Package Version Architecture Depends
+          dpkg-deb -c "$deb" | grep -F './usr/bin/remotrans'
+          dpkg-deb -c "$deb" | grep -F './usr/share/remotetranscode/movie/'
+          dpkg-deb -c "$deb" | grep -F './usr/lib/systemd/system/remotetranscode.service'
+
+      - name: Lint package
+        run: |
+          lintian --no-fail-on-warnings dist/remotetranscode_*_amd64.deb || true
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: remotetranscode-debian-${{ matrix.series }}-amd64
+          path: |
+            dist/remotetranscode_*_amd64.deb
+            dist/remotetranscode_*.buildinfo
+            dist/remotetranscode_*.changes
+          if-no-files-found: error

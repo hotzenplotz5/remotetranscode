@@ -1,0 +1,22 @@
+remotetranscode Debian source package
+=====================================
+
+The packaging branch is based on Zabrimus/remotetranscode upstream commit
+ca9475181fe0e38f75f7a87866e93432bd447407.
+
+Launchpad builders must not download Meson wrap dependencies during the package
+build.  Run packaging/prepare-orig.sh before creating the source package.  The
+helper resolves all checksum-pinned wrap sources and creates both a prepared
+source directory and a matching .orig.tar.xz without debian/.
+
+The actual dpkg-buildpackage/debuild invocation must run from that prepared
+source tree.  Network access during dh_auto_configure or dh_auto_build is a
+packaging bug.
+
+Licensing note
+--------------
+
+The Zabrimus remotetranscode repository currently has no project-wide licence
+file or explicit redistribution licence.  The package can be developed and
+built for testing, but public PPA publication must wait for explicit upstream
+redistribution terms or separate Launchpad approval.
